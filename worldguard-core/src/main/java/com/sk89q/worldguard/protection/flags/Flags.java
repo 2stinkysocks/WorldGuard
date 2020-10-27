@@ -47,6 +47,10 @@ public final class Flags {
     // Overrides membership check
     public static final StateFlag PASSTHROUGH = register(new StateFlag("passthrough", false));
 
+    // Removes association from regions without this flag
+    // Adds association to regions, which contain at least one owner of this region
+    public static final BooleanFlag PROTECT_SURROUNDINGS = register(new BooleanFlag("protect-surroundings"));
+
     // This flag is unlike the others. It forces the checking of region membership
     public static final StateFlag BUILD = register(new BuildFlag("build", true));
 

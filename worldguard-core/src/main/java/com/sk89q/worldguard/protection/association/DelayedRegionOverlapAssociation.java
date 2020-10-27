@@ -22,12 +22,19 @@ package com.sk89q.worldguard.protection.association;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldedit.world.World;
+import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.regions.RegionQuery;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 /**
  * Determines that the association to a region is {@code OWNER} if the input
@@ -68,7 +75,39 @@ public class DelayedRegionOverlapAssociation extends AbstractRegionOverlapAssoci
     public Association getAssociation(List<ProtectedRegion> regions) {
         if (source == null) {
             ApplicableRegionSet result = query.getApplicableRegions(location);
-            source = result.getRegions();
+
+            if (result.queryAllValues(null, Flags.PROTECT_SURROUNDINGS).contains(true)) {
+                Set<ProtectedRegion> source = new HashSet<>();
+                Collection<ProtectedRegion> all = WorldGuard.getInstance().getPlatform().getRegionContainer()
+                        .get((World) location.getExtent()).getRegions().values();
+
+                for (ProtectedRegion resultRegion : result) {
+                    if (Boolean.TRUE.equals(resultRegion.getFlag(Flags.PROTECT_SURROUNDINGS))) {
+                        source.add(resultRegion);
+
+                        for (UUID uniqueId : resultRegion.getOwners().getUniqueIds()) {
+                            for (ProtectedRegion region : all) {
+                                if (region.getOwners().contains(uniqueId)) {
+                                    source.add(region);
+                                }
+                            }
+                        }
+
+                        for (String player : resultRegion.getOwners().getPlayers()) {
+                            for (ProtectedRegion region : all) {
+                                if (region.getOwners().contains(player)) {
+                                    source.add(region);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                this.source = source;
+            } else {
+                source = result.getRegions();
+            }
+
             calcMaxPriority();
         }
 
