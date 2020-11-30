@@ -217,12 +217,20 @@ public class RegionProtectionListener extends AbstractListener {
             event.filter((Predicate<Location>) target -> {
                 boolean canBreak;
                 String what;
+                Block block;
 
                 /* TNT */
                 if (event.getCause().find(EntityType.PRIMED_TNT, EntityType.MINECART_TNT) != null) {
                     canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK, Flags.TNT));
                     what = "use dynamite";
-
+                } else if ((block = event.getCause().getFirstBlock()) != null && Materials.isBed(block.getType())) {
+                    // Reusing the SLEEP flag for bed explosions in the end or nether
+                    canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK, Flags.SLEEP));
+                    what = "sleep";
+                } else if (block != null && block.getType() == Material.RESPAWN_ANCHOR) {
+                    // Reusing the RESPAWN_ANCHORS flag for respawn anchor explosions in the overworld
+                    canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK, Flags.RESPAWN_ANCHORS));
+                    what = "use anchors";
                 /* Everything else */
                 } else {
                     canBreak = query.testBuild(BukkitAdapter.adapt(target), associable, combine(event, Flags.BLOCK_BREAK));

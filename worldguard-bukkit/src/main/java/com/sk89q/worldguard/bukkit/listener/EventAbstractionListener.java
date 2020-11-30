@@ -1081,7 +1081,11 @@ public class EventAbstractionListener extends AbstractListener {
     public void onBlockExplode(BlockExplodeEvent event) {
         final BreakBlockEvent eventToFire = new BreakBlockEvent(event, create(event.getBlock()),
                 event.getBlock().getLocation().getWorld(), event.blockList(), Material.AIR);
-        eventToFire.getRelevantFlags().add(Flags.OTHER_EXPLOSION);
+        // Actually, the player who used the bed or the respawn anchor should be associated
+        // However, the API doesn't allow this currently
+        if (!Materials.isBed(event.getBlock().getType()) && event.getBlock().getType() != Material.RESPAWN_ANCHOR) {
+            eventToFire.getRelevantFlags().add(Flags.OTHER_EXPLOSION);
+        }
         Events.fireBulkEventToCancel(event, eventToFire);
     }
 
