@@ -59,8 +59,9 @@ import com.sk89q.worldguard.bukkit.listener.WorldGuardWeatherListener;
 import com.sk89q.worldguard.bukkit.listener.WorldGuardWorldListener;
 import com.sk89q.worldguard.bukkit.listener.WorldRulesListener;
 import com.sk89q.worldguard.bukkit.session.BukkitSessionManager;
+import com.sk89q.worldguard.bukkit.util.ClassSourceValidator;
+import com.sk89q.worldguard.bukkit.util.Entities;
 import com.sk89q.worldguard.bukkit.util.Events;
-import com.sk89q.worldguard.bukkit.util.logging.ClassSourceValidator;
 import com.sk89q.worldguard.commands.GeneralCommands;
 import com.sk89q.worldguard.commands.ProtectionCommands;
 import com.sk89q.worldguard.commands.ToggleCommands;
@@ -71,10 +72,12 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
 import com.sk89q.worldguard.protection.managers.storage.file.DirectoryYamlDriver;
 import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.util.logging.RecordMessagePrefixer;
 import org.bstats.bukkit.Metrics;
+import org.bstats.charts.DrilldownPie;
+import org.bstats.charts.SimplePie;
+import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -105,6 +108,8 @@ public class WorldGuardPlugin extends JavaPlugin {
     private final CommandsManager<Actor> commands;
     private PlayerMoveListener playerMoveListener;
 
+    private static final int BSTATS_PLUGIN_ID = 3283;
+
     /**
      * Construct objects. Actual loading occurs when the plugin is enabled, so
      * this merely instantiates the objects.
@@ -132,6 +137,10 @@ public class WorldGuardPlugin extends JavaPlugin {
      */
     @Override
     public void onEnable() {
+        // Catch bad things being done by naughty plugins that include WorldGuard's classes
+        ClassSourceValidator verifier = new ClassSourceValidator(this);
+        verifier.reportMismatches(ImmutableList.of(WorldGuard.class, ProtectedRegion.class, Flag.class));
+
         configureLogger();
 
         getDataFolder().mkdirs(); // Need to create the plugins/WorldGuard folder
@@ -145,21 +154,14 @@ public class WorldGuardPlugin extends JavaPlugin {
         // Set the proper command injector
         commands.setInjector(new SimpleInjector(WorldGuard.getInstance()));
 
-        // Catch bad things being done by naughty plugins that include
-        // WorldGuard's classes
-        ClassSourceValidator verifier = new ClassSourceValidator(this);
-        verifier.reportMismatches(ImmutableList.of(ProtectedRegion.class, ProtectedCuboidRegion.class, Flag.class));
-
         // Register command classes
         final CommandsManagerRegistration reg = new CommandsManagerRegistration(this, commands);
         reg.register(ToggleCommands.class);
         reg.register(ProtectionCommands.class);
 
-        getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-            if (!platform.getGlobalStateManager().hasCommandBookGodMode()) {
-                reg.register(GeneralCommands.class);
-            }
-        }, 0L);
+        if (!platform.getGlobalStateManager().hasCommandBookGodMode()) {
+            reg.register(GeneralCommands.class);
+        }
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, sessionManager, BukkitSessionManager.RUN_DELAY, BukkitSessionManager.RUN_DELAY);
 
@@ -212,20 +214,20 @@ public class WorldGuardPlugin extends JavaPlugin {
         ((SimpleFlagRegistry) WorldGuard.getInstance().getFlagRegistry()).setInitialized(true);
 
         // Enable metrics
-        final Metrics metrics = new Metrics(this, 3283); // bStats plugin id
-        if (metrics.isEnabled() && platform.getGlobalStateManager().extraStats) {
+        final Metrics metrics = new Metrics(this, BSTATS_PLUGIN_ID); // bStats plugin id
+        if (platform.getGlobalStateManager().extraStats) {
             setupCustomCharts(metrics);
         }
     }
 
     private void setupCustomCharts(Metrics metrics) {
-        metrics.addCustomChart(new Metrics.SingleLineChart("region_count", () ->
+        metrics.addCustomChart(new SingleLineChart("region_count", () ->
                 platform.getRegionContainer().getLoaded().stream().mapToInt(RegionManager::size).sum()));
-        metrics.addCustomChart(new Metrics.SimplePie("region_driver", () -> {
+        metrics.addCustomChart(new SimplePie("region_driver", () -> {
             RegionDriver driver = platform.getGlobalStateManager().selectedRegionStoreDriver;
             return driver instanceof DirectoryYamlDriver ? "yaml" : driver instanceof SQLDriver ? "sql" : "unknown";
         }));
-        metrics.addCustomChart(new Metrics.DrilldownPie("blacklist", () -> {
+        metrics.addCustomChart(new DrilldownPie("blacklist", () -> {
             int empty = 0;
             Map<String, Integer> blacklistMap = new HashMap<>();
             Map<String, Integer> whitelistMap = new HashMap<>();
@@ -248,14 +250,14 @@ public class WorldGuardPlugin extends JavaPlugin {
             blacklistCounts.put("whitelist", whitelistMap);
             return blacklistCounts;
         }));
-        metrics.addCustomChart(new Metrics.SimplePie("chest_protection", () ->
+        metrics.addCustomChart(new SimplePie("chest_protection", () ->
                 "" + platform.getGlobalStateManager().getWorldConfigs().stream().anyMatch(cfg -> cfg.signChestProtection)));
-        metrics.addCustomChart(new Metrics.SimplePie("build_permissions", () ->
+        metrics.addCustomChart(new SimplePie("build_permissions", () ->
                 "" + platform.getGlobalStateManager().getWorldConfigs().stream().anyMatch(cfg -> cfg.buildPermissions)));
 
-        metrics.addCustomChart(new Metrics.SimplePie("custom_flags", () ->
+        metrics.addCustomChart(new SimplePie("custom_flags", () ->
                 "" + (WorldGuard.getInstance().getFlagRegistry().size() > Flags.INBUILT_FLAGS.size())));
-        metrics.addCustomChart(new Metrics.SimplePie("custom_handlers", () ->
+        metrics.addCustomChart(new SimplePie("custom_handlers", () ->
                 "" + (WorldGuard.getInstance().getPlatform().getSessionManager().customHandlersRegistered())));
     }
 
@@ -418,8 +420,9 @@ public class WorldGuardPlugin extends JavaPlugin {
     }
 
     public Actor wrapCommandSender(CommandSender sender) {
-        if (sender instanceof Player) {
-            return wrapPlayer((Player) sender);
+        if (sender instanceof Player player) {
+            if (Entities.isNPC(player)) return null;
+            return wrapPlayer(player);
         }
 
         try {
@@ -450,6 +453,13 @@ public class WorldGuardPlugin extends JavaPlugin {
      */
     public LocalPlayer wrapOfflinePlayer(OfflinePlayer player) {
         return new BukkitOfflinePlayer(this, player);
+    }
+
+    /**
+     * Internal method. Do not use as API.
+     */
+    public BukkitConfigurationManager getConfigManager() {
+        return platform.getGlobalStateManager();
     }
 
     /**

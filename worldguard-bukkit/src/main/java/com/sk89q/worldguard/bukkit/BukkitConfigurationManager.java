@@ -37,7 +37,6 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
 
     private boolean hasCommandBookGodMode;
     boolean extraStats;
-    boolean timedSessionHandlers;
 
     /**
      * Construct the object.
@@ -57,7 +56,6 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
     public void load() {
         super.load();
         this.extraStats = getConfig().getBoolean("custom-metrics-charts", true);
-        this.timedSessionHandlers = getConfig().getBoolean("extra-timings.session-handlers", true);
     }
 
     @Override
@@ -94,6 +92,10 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
     @Override
     public BukkitWorldConfiguration get(World world) {
         String worldName = world.getName();
+        return get(worldName);
+    }
+
+    public BukkitWorldConfiguration get(String worldName) {
         BukkitWorldConfiguration config = worlds.get(worldName);
         BukkitWorldConfiguration newConfig = null;
 
@@ -101,8 +103,8 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
             if (newConfig == null) {
                 newConfig = new BukkitWorldConfiguration(plugin, worldName, this.getConfig());
             }
-            worlds.putIfAbsent(world.getName(), newConfig);
-            config = worlds.get(world.getName());
+            worlds.putIfAbsent(worldName, newConfig);
+            config = worlds.get(worldName);
         }
 
         return config;

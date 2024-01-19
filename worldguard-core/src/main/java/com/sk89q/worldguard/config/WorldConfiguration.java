@@ -129,6 +129,7 @@ public abstract class WorldConfiguration {
     public boolean allowTamedSpawns;
     public int maxClaimVolume;
     public boolean claimOnlyInsideExistingRegions;
+    public String setParentOnClaim;
     public int maxRegionCountPerPlayer;
     public boolean antiWolfDumbness;
     public boolean signChestProtection;
@@ -138,6 +139,8 @@ public abstract class WorldConfiguration {
     public boolean disablePlayerCropTrampling;
     public boolean disableCreatureTurtleEggTrampling;
     public boolean disablePlayerTurtleEggTrampling;
+    public boolean disableCreatureSnifferEggTrampling;
+    public boolean disablePlayerSnifferEggTrampling;
     public boolean preventLightningFire;
     public Set<String> disallowedLightningBlocks;
     public boolean disableThunder;
@@ -157,11 +160,14 @@ public abstract class WorldConfiguration {
     public boolean disableGrassGrowth;
     public boolean disableMyceliumSpread;
     public boolean disableVineGrowth;
+    public boolean disableRockGrowth;
+    public boolean disableSculkGrowth;
     public boolean disableCropGrowth;
     public boolean disableEndermanGriefing;
     public boolean disableSnowmanTrails;
     public boolean disableSoilDehydration;
     public boolean disableCoralBlockFade;
+    public boolean disableCopperBlockFade;
     public Set<String> allowedSnowFallOver;
     public boolean regionInvinciblityRemovesMobs;
     public boolean regionCancelEmptyChatEvents;
@@ -170,7 +176,6 @@ public abstract class WorldConfiguration {
     public boolean fakePlayerBuildOverride;
     public boolean explosionFlagCancellation;
     public boolean disableDeathMessages;
-    public boolean disableObsidianGenerators;
     public boolean strictEntitySpawn;
     public boolean ignoreHopperMoveEvents;
     public boolean breakDeniedHoppers;

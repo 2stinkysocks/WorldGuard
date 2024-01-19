@@ -25,10 +25,11 @@ import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.session.MoveType;
 import com.sk89q.worldguard.session.Session;
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.entity.AbstractHorse;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Horse;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -40,25 +41,28 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.util.Vector;
+import org.spigotmc.event.entity.EntityMountEvent;
 
-public class PlayerMoveListener implements Listener {
-
-    private final WorldGuardPlugin plugin;
+public class PlayerMoveListener extends AbstractListener {
 
     public PlayerMoveListener(WorldGuardPlugin plugin) {
-        this.plugin = plugin;
+        super(plugin);
     }
 
+    @Override
     public void registerEvents() {
         if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().usePlayerMove) {
-            PluginManager pm = plugin.getServer().getPluginManager();
-            pm.registerEvents(this, plugin);
+            PluginManager pm = getPlugin().getServer().getPluginManager();
+            pm.registerEvents(this, getPlugin());
+            if (PaperLib.isSpigot()) {
+                pm.registerEvents(new EntityMountListener(), getPlugin());
+            }
         }
     }
 
     @EventHandler
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        LocalPlayer player = plugin.wrapPlayer(event.getPlayer());
+        LocalPlayer player = getPlugin().wrapPlayer(event.getPlayer());
 
         Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
         session.testMoveTo(player, BukkitAdapter.adapt(event.getRespawnLocation()), MoveType.RESPAWN, true);
@@ -68,7 +72,7 @@ public class PlayerMoveListener implements Listener {
     public void onVehicleEnter(VehicleEnterEvent event) {
         Entity entity = event.getEntered();
         if (entity instanceof Player) {
-            LocalPlayer player = plugin.wrapPlayer((Player) entity);
+            LocalPlayer player = getPlugin().wrapPlayer((Player) entity);
             Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
             if (null != session.testMoveTo(player, BukkitAdapter.adapt(event.getVehicle().getLocation()), MoveType.EMBARK, true)) {
                 event.setCancelled(true);
@@ -87,7 +91,7 @@ public class PlayerMoveListener implements Listener {
         }
 
         final Player player = event.getPlayer();
-        LocalPlayer localPlayer = plugin.wrapPlayer(player);
+        LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
 
         Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
         MoveType moveType = MoveType.MOVE;
@@ -95,7 +99,7 @@ public class PlayerMoveListener implements Listener {
             moveType = MoveType.GLIDE;
         } else if (event.getPlayer().isSwimming()) {
             moveType = MoveType.SWIM;
-        } else if (event.getPlayer().getVehicle() != null && event.getPlayer().getVehicle() instanceof Horse) {
+        } else if (event.getPlayer().getVehicle() != null && event.getPlayer().getVehicle() instanceof AbstractHorse) {
             moveType = MoveType.RIDE;
         }
         com.sk89q.worldedit.util.Location weLocation = session.testMoveTo(localPlayer, BukkitAdapter.adapt(to), moveType);
@@ -128,7 +132,7 @@ public class PlayerMoveListener implements Listener {
 
                 player.teleport(override.clone().add(0, 1, 0));
 
-                Bukkit.getScheduler().runTaskLater(plugin, () -> player.teleport(override.clone().add(0, 1, 0)), 1);
+                Bukkit.getScheduler().runTaskLater(getPlugin(), () -> player.teleport(override.clone().add(0, 1, 0)), 1);
             }
         }
     }
@@ -136,13 +140,29 @@ public class PlayerMoveListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         final Player player = event.getPlayer();
-        LocalPlayer localPlayer = plugin.wrapPlayer(player);
+        LocalPlayer localPlayer = getPlugin().wrapPlayer(player);
 
         Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
         com.sk89q.worldedit.util.Location loc = session.testMoveTo(localPlayer,
             BukkitAdapter.adapt(event.getPlayer().getLocation()), MoveType.OTHER_CANCELLABLE); // white lie
         if (loc != null) {
             player.teleport(BukkitAdapter.adapt(loc));
+        }
+
+        session.uninitialize(localPlayer);
+    }
+
+    private class EntityMountListener implements Listener {
+        @EventHandler
+        public void onEntityMount(EntityMountEvent event) {
+            Entity entity = event.getEntity();
+            if (entity instanceof Player) {
+                LocalPlayer player = getPlugin().wrapPlayer((Player) entity);
+                Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
+                if (null != session.testMoveTo(player, BukkitAdapter.adapt(event.getMount().getLocation()), MoveType.EMBARK, true)) {
+                    event.setCancelled(true);
+                }
+            }
         }
     }
 }

@@ -52,27 +52,12 @@ public final class Materials {
     private static final Map<Material, Integer> MATERIAL_FLAGS = new EnumMap<>(Material.class);
     private static final Set<PotionEffectType> DAMAGE_EFFECTS = new HashSet<>();
 
-    private static Set<Material> shulkerBoxes = new HashSet<>();
+    private static void putMaterialTag(Tag<Material> tag, Integer value) {
+        tag.getValues().forEach(mat -> MATERIAL_FLAGS.put(mat, value));
+    }
+    private static Tag<Material> SIGNS_TAG;
 
     static {
-        shulkerBoxes.add(Material.SHULKER_BOX);
-        shulkerBoxes.add(Material.WHITE_SHULKER_BOX);
-        shulkerBoxes.add(Material.ORANGE_SHULKER_BOX);
-        shulkerBoxes.add(Material.MAGENTA_SHULKER_BOX);
-        shulkerBoxes.add(Material.LIGHT_BLUE_SHULKER_BOX);
-        shulkerBoxes.add(Material.YELLOW_SHULKER_BOX);
-        shulkerBoxes.add(Material.LIME_SHULKER_BOX);
-        shulkerBoxes.add(Material.PINK_SHULKER_BOX);
-        shulkerBoxes.add(Material.GRAY_SHULKER_BOX);
-        shulkerBoxes.add(Material.LIGHT_GRAY_SHULKER_BOX);
-        shulkerBoxes.add(Material.CYAN_SHULKER_BOX);
-        shulkerBoxes.add(Material.PURPLE_SHULKER_BOX);
-        shulkerBoxes.add(Material.BLUE_SHULKER_BOX);
-        shulkerBoxes.add(Material.BROWN_SHULKER_BOX);
-        shulkerBoxes.add(Material.GREEN_SHULKER_BOX);
-        shulkerBoxes.add(Material.RED_SHULKER_BOX);
-        shulkerBoxes.add(Material.BLACK_SHULKER_BOX);
-
         ENTITY_ITEMS.put(EntityType.PAINTING, Material.PAINTING);
         ENTITY_ITEMS.put(EntityType.ARROW, Material.ARROW);
         ENTITY_ITEMS.put(EntityType.SNOWBALL, Material.SNOWBALL);
@@ -80,6 +65,7 @@ public final class Materials {
         ENTITY_ITEMS.put(EntityType.ENDER_PEARL, Material.ENDER_PEARL);
         ENTITY_ITEMS.put(EntityType.THROWN_EXP_BOTTLE, Material.EXPERIENCE_BOTTLE);
         ENTITY_ITEMS.put(EntityType.ITEM_FRAME, Material.ITEM_FRAME);
+        ENTITY_ITEMS.put(EntityType.GLOW_ITEM_FRAME, Material.GLOW_ITEM_FRAME);
         ENTITY_ITEMS.put(EntityType.PRIMED_TNT, Material.TNT);
         ENTITY_ITEMS.put(EntityType.FIREWORK, Material.FIREWORK_ROCKET);
         ENTITY_ITEMS.put(EntityType.MINECART_COMMAND, Material.COMMAND_BLOCK_MINECART);
@@ -104,12 +90,8 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.LAVA, 0);
         MATERIAL_FLAGS.put(Material.SAND, 0);
         MATERIAL_FLAGS.put(Material.GRAVEL, 0);
-        MATERIAL_FLAGS.put(Material.GOLD_ORE, 0);
-        MATERIAL_FLAGS.put(Material.IRON_ORE, 0);
-        MATERIAL_FLAGS.put(Material.COAL_ORE, 0);
         MATERIAL_FLAGS.put(Material.SPONGE, 0);
         MATERIAL_FLAGS.put(Material.GLASS, 0);
-        MATERIAL_FLAGS.put(Material.LAPIS_ORE, 0);
         MATERIAL_FLAGS.put(Material.LAPIS_BLOCK, 0);
         MATERIAL_FLAGS.put(Material.DISPENSER, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.SANDSTONE, 0);
@@ -133,7 +115,7 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.IRON_BLOCK, 0);
         MATERIAL_FLAGS.put(Material.BRICK, 0);
         MATERIAL_FLAGS.put(Material.TNT, MODIFIED_ON_RIGHT);
-        MATERIAL_FLAGS.put(Material.BOOKSHELF, 0);
+        MATERIAL_FLAGS.put(Material.BOOKSHELF, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.MOSSY_COBBLESTONE, 0);
         MATERIAL_FLAGS.put(Material.OBSIDIAN, 0);
         MATERIAL_FLAGS.put(Material.TORCH, 0);
@@ -141,7 +123,6 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.SPAWNER, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.CHEST, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.REDSTONE_WIRE, MODIFIED_ON_RIGHT);
-        MATERIAL_FLAGS.put(Material.DIAMOND_ORE, 0);
         MATERIAL_FLAGS.put(Material.DIAMOND_BLOCK, 0);
         MATERIAL_FLAGS.put(Material.CRAFTING_TABLE, 0);
         MATERIAL_FLAGS.put(Material.WHEAT, 0);
@@ -152,7 +133,6 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.COBBLESTONE_STAIRS, 0);
         MATERIAL_FLAGS.put(Material.LEVER, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.STONE_PRESSURE_PLATE, 0);
-        MATERIAL_FLAGS.put(Material.REDSTONE_ORE, 0);
         MATERIAL_FLAGS.put(Material.REDSTONE_WALL_TORCH, 0);
         MATERIAL_FLAGS.put(Material.REDSTONE_TORCH, 0);
         MATERIAL_FLAGS.put(Material.SNOW, 0);
@@ -201,7 +181,6 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.NETHER_BRICK_STAIRS, 0);
         MATERIAL_FLAGS.put(Material.ENCHANTING_TABLE, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.BREWING_STAND, MODIFIED_ON_RIGHT);
-        MATERIAL_FLAGS.put(Material.CAULDRON, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.END_PORTAL, 0);
         MATERIAL_FLAGS.put(Material.END_PORTAL_FRAME, 0);
         MATERIAL_FLAGS.put(Material.END_STONE, 0);
@@ -209,7 +188,6 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.REDSTONE_LAMP, 0);
         MATERIAL_FLAGS.put(Material.COCOA, 0);
         MATERIAL_FLAGS.put(Material.SANDSTONE_STAIRS, 0);
-        MATERIAL_FLAGS.put(Material.EMERALD_ORE, 0);
         MATERIAL_FLAGS.put(Material.ENDER_CHEST, 0);
         MATERIAL_FLAGS.put(Material.TRIPWIRE_HOOK, 0);
         MATERIAL_FLAGS.put(Material.TRIPWIRE, 0);
@@ -255,7 +233,7 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.ACACIA_DOOR, MODIFIED_ON_RIGHT);
         MATERIAL_FLAGS.put(Material.DARK_OAK_DOOR, MODIFIED_ON_RIGHT);
 
-        MATERIAL_FLAGS.put(Material.GRASS_PATH, 0);
+        MATERIAL_FLAGS.put(Material.DIRT_PATH, 0);
         MATERIAL_FLAGS.put(Material.CHORUS_PLANT, 0);
         MATERIAL_FLAGS.put(Material.CHORUS_FLOWER, 0);
         MATERIAL_FLAGS.put(Material.BEETROOTS, 0);
@@ -717,7 +695,6 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.NETHERITE_SHOVEL, 0);
         MATERIAL_FLAGS.put(Material.NETHERITE_SWORD, 0);
 
-        MATERIAL_FLAGS.put(Material.NETHER_GOLD_ORE, 0);
         MATERIAL_FLAGS.put(Material.NETHER_SPROUTS, 0);
         MATERIAL_FLAGS.put(Material.PIGLIN_BANNER_PATTERN, 0);
         MATERIAL_FLAGS.put(Material.POLISHED_BASALT, 0);
@@ -746,79 +723,173 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.WEEPING_VINES, 0);
         MATERIAL_FLAGS.put(Material.WEEPING_VINES_PLANT, 0);
 
+        // 1.17
+        MATERIAL_FLAGS.put(Material.DEEPSLATE, 0);
+        MATERIAL_FLAGS.put(Material.COBBLED_DEEPSLATE, 0);
+        MATERIAL_FLAGS.put(Material.POLISHED_DEEPSLATE, 0);
+        MATERIAL_FLAGS.put(Material.CALCITE, 0);
+        MATERIAL_FLAGS.put(Material.TUFF, 0);
+        MATERIAL_FLAGS.put(Material.DRIPSTONE_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.ROOTED_DIRT, 0);
 
-        // Fake tags
-        for (Material m : shulkerBoxes) {
-            MATERIAL_FLAGS.put(m, MODIFIED_ON_RIGHT);
+        MATERIAL_FLAGS.put(Material.RAW_IRON_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.RAW_COPPER_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.RAW_GOLD_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.AMETHYST_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.BUDDING_AMETHYST, 0);
+
+        MATERIAL_FLAGS.put(Material.EXPOSED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WEATHERED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.OXIDIZED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.EXPOSED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WEATHERED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.OXIDIZED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_COPPER_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_EXPOSED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_WEATHERED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_OXIDIZED_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.AZALEA, 0);
+        MATERIAL_FLAGS.put(Material.FLOWERING_AZALEA, 0);
+
+        MATERIAL_FLAGS.put(Material.COPPER_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_EXPOSED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_WEATHERED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.WAXED_OXIDIZED_CUT_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.TINTED_GLASS, 0);
+        MATERIAL_FLAGS.put(Material.SPORE_BLOSSOM, 0);
+        MATERIAL_FLAGS.put(Material.MOSS_CARPET, 0);
+        MATERIAL_FLAGS.put(Material.BIG_DRIPLEAF, 0);
+        MATERIAL_FLAGS.put(Material.BIG_DRIPLEAF_STEM, 0);
+        MATERIAL_FLAGS.put(Material.SMALL_DRIPLEAF, 0);
+        MATERIAL_FLAGS.put(Material.SMOOTH_BASALT, 0);
+        MATERIAL_FLAGS.put(Material.INFESTED_DEEPSLATE, 0);
+        MATERIAL_FLAGS.put(Material.DEEPSLATE_BRICKS, 0);
+        MATERIAL_FLAGS.put(Material.CRACKED_DEEPSLATE_BRICKS, 0);
+        MATERIAL_FLAGS.put(Material.DEEPSLATE_TILES, 0);
+        MATERIAL_FLAGS.put(Material.CRACKED_DEEPSLATE_TILES, 0);
+        MATERIAL_FLAGS.put(Material.CHISELED_DEEPSLATE, 0);
+        MATERIAL_FLAGS.put(Material.GLOW_LICHEN, 0);
+        MATERIAL_FLAGS.put(Material.LIGHT, MODIFIED_ON_RIGHT);
+        MATERIAL_FLAGS.put(Material.LIGHTNING_ROD, 0);
+        MATERIAL_FLAGS.put(Material.SCULK_SENSOR, 0);
+        MATERIAL_FLAGS.put(Material.AMETHYST_SHARD, 0);
+        MATERIAL_FLAGS.put(Material.RAW_IRON, 0);
+        MATERIAL_FLAGS.put(Material.RAW_COPPER, 0);
+        MATERIAL_FLAGS.put(Material.COPPER_INGOT, 0);
+        MATERIAL_FLAGS.put(Material.RAW_GOLD, 0);
+        MATERIAL_FLAGS.put(Material.POWDER_SNOW_BUCKET, 0);
+        MATERIAL_FLAGS.put(Material.AXOLOTL_BUCKET, 0);
+        MATERIAL_FLAGS.put(Material.BUNDLE, 0);
+        MATERIAL_FLAGS.put(Material.SPYGLASS, 0);
+        MATERIAL_FLAGS.put(Material.GLOW_INK_SAC, 0);
+        MATERIAL_FLAGS.put(Material.GLOW_ITEM_FRAME, 0);
+        MATERIAL_FLAGS.put(Material.GLOW_BERRIES, 0);
+
+        MATERIAL_FLAGS.put(Material.SMALL_AMETHYST_BUD, 0);
+        MATERIAL_FLAGS.put(Material.MEDIUM_AMETHYST_BUD, 0);
+        MATERIAL_FLAGS.put(Material.LARGE_AMETHYST_BUD, 0);
+        MATERIAL_FLAGS.put(Material.AMETHYST_CLUSTER, 0);
+        MATERIAL_FLAGS.put(Material.POWDER_SNOW, 0);
+
+        MATERIAL_FLAGS.put(Material.CAVE_VINES, MODIFIED_ON_RIGHT);
+        MATERIAL_FLAGS.put(Material.CAVE_VINES_PLANT, MODIFIED_ON_RIGHT);
+        MATERIAL_FLAGS.put(Material.MOSS_BLOCK, 0);
+        MATERIAL_FLAGS.put(Material.HANGING_ROOTS, 0);
+        MATERIAL_FLAGS.put(Material.POINTED_DRIPSTONE, 0);
+
+        // 1.19
+        MATERIAL_FLAGS.put(Material.MUD, 0);
+        MATERIAL_FLAGS.put(Material.MANGROVE_ROOTS, 0);
+        MATERIAL_FLAGS.put(Material.MUDDY_MANGROVE_ROOTS, 0);
+        MATERIAL_FLAGS.put(Material.PACKED_MUD, 0);
+        MATERIAL_FLAGS.put(Material.MUD_BRICKS, 0);
+        MATERIAL_FLAGS.put(Material.SCULK, 0);
+        MATERIAL_FLAGS.put(Material.SCULK_VEIN, 0);
+        MATERIAL_FLAGS.put(Material.SCULK_CATALYST, 0);
+        MATERIAL_FLAGS.put(Material.SCULK_SHRIEKER, 0);
+        MATERIAL_FLAGS.put(Material.TADPOLE_BUCKET, 0);
+        MATERIAL_FLAGS.put(Material.RECOVERY_COMPASS, 0);
+        MATERIAL_FLAGS.put(Material.DISC_FRAGMENT_5, 0);
+        MATERIAL_FLAGS.put(Material.GOAT_HORN, 0);
+        MATERIAL_FLAGS.put(Material.OCHRE_FROGLIGHT, 0);
+        MATERIAL_FLAGS.put(Material.VERDANT_FROGLIGHT, 0);
+        MATERIAL_FLAGS.put(Material.PEARLESCENT_FROGLIGHT, 0);
+        MATERIAL_FLAGS.put(Material.FROGSPAWN, 0);
+        MATERIAL_FLAGS.put(Material.ECHO_SHARD, 0);
+        MATERIAL_FLAGS.put(Material.REINFORCED_DEEPSLATE, 0);
+
+        // 1.20
+        try {
+            SIGNS_TAG = Tag.ALL_SIGNS;
+
+            MATERIAL_FLAGS.put(Material.BAMBOO_MOSAIC, 0);
+            MATERIAL_FLAGS.put(Material.BAMBOO_BLOCK, 0);
+            MATERIAL_FLAGS.put(Material.STRIPPED_BAMBOO_BLOCK, 0);
+            MATERIAL_FLAGS.put(Material.SUSPICIOUS_SAND, 0);
+            MATERIAL_FLAGS.put(Material.SUSPICIOUS_GRAVEL, 0);
+            MATERIAL_FLAGS.put(Material.PITCHER_PLANT, 0);
+            MATERIAL_FLAGS.put(Material.CHISELED_BOOKSHELF, MODIFIED_ON_RIGHT);
+            MATERIAL_FLAGS.put(Material.DECORATED_POT, MODIFIED_ON_RIGHT);
+            MATERIAL_FLAGS.put(Material.BRUSH, 0);
+            MATERIAL_FLAGS.put(Material.SNIFFER_EGG, 0);
+            MATERIAL_FLAGS.put(Material.CALIBRATED_SCULK_SENSOR, 0);
+            MATERIAL_FLAGS.put(Material.PIGLIN_HEAD, 0);
+            MATERIAL_FLAGS.put(Material.PIGLIN_WALL_HEAD, 0);
+            MATERIAL_FLAGS.put(Material.TORCHFLOWER_SEEDS, 0);
+            MATERIAL_FLAGS.put(Material.TORCHFLOWER_CROP, 0);
+            MATERIAL_FLAGS.put(Material.PITCHER_CROP, 0);
+            MATERIAL_FLAGS.put(Material.PINK_PETALS, 0);
+            MATERIAL_FLAGS.put(Material.PITCHER_POD, 0);
+            MATERIAL_FLAGS.put(Material.NETHERITE_UPGRADE_SMITHING_TEMPLATE, 0);
+        } catch (NoSuchFieldError ignored) {
         }
 
         // Generated via tag
-        for (Material door : Tag.DOORS.getValues()) {
-            MATERIAL_FLAGS.put(door, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.WOODEN_DOORS, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.WOODEN_TRAPDOORS, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.SHULKER_BOXES, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.ITEMS_BOATS, 0);
+        putMaterialTag(Tag.BANNERS, 0);
+        putMaterialTag(Tag.SLABS, 0);
+        putMaterialTag(Tag.PLANKS, 0);
+        putMaterialTag(Tag.WOOL_CARPETS, 0);
+        putMaterialTag(Tag.SAPLINGS, 0);
+        putMaterialTag(Tag.LOGS, 0);
+        putMaterialTag(Tag.LEAVES, 0);
+        putMaterialTag(Tag.STAIRS, 0);
+        putMaterialTag(Tag.WOOL, 0);
+        putMaterialTag(Tag.WOODEN_PRESSURE_PLATES, 0);
+        putMaterialTag(Tag.BUTTONS, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.FLOWER_POTS, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.WALLS, 0);
+        putMaterialTag(SIGNS_TAG, 0);
+        putMaterialTag(Tag.SMALL_FLOWERS, 0);
+        putMaterialTag(Tag.BEDS, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.ITEMS_MUSIC_DISCS, 0);
+        putMaterialTag(Tag.ITEMS_BANNERS, 0);
+        putMaterialTag(Tag.FENCE_GATES, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.FENCES, 0);
+
+        putMaterialTag(Tag.COAL_ORES, 0);
+        putMaterialTag(Tag.IRON_ORES, 0);
+        putMaterialTag(Tag.GOLD_ORES, 0);
+        putMaterialTag(Tag.DIAMOND_ORES, 0);
+        putMaterialTag(Tag.REDSTONE_ORES, 0);
+        putMaterialTag(Tag.COPPER_ORES, 0);
+        putMaterialTag(Tag.EMERALD_ORES, 0);
+        putMaterialTag(Tag.LAPIS_ORES, 0);
+        putMaterialTag(Tag.CANDLES, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.CANDLE_CAKES, MODIFIED_ON_RIGHT);
+        putMaterialTag(Tag.CAULDRONS, MODIFIED_ON_RIGHT);
+        try {
+            // 1.20
+            putMaterialTag(Tag.ITEMS_TRIM_TEMPLATES, 0);
+            putMaterialTag(Tag.ITEMS_DECORATED_POT_SHERDS, 0);
+        } catch (NoSuchFieldError ignored) {
         }
-        for (Material boat : Tag.ITEMS_BOATS.getValues()) {
-            MATERIAL_FLAGS.put(boat, 0);
-        }
-        for (Material banner : Tag.BANNERS.getValues()) {
-            MATERIAL_FLAGS.put(banner, 0);
-        }
-        for (Material slab : Tag.SLABS.getValues()) {
-            MATERIAL_FLAGS.put(slab, 0);
-        }
-        for (Material plank : Tag.PLANKS.getValues()) {
-            MATERIAL_FLAGS.put(plank, 0);
-        }
-        for (Material carpet : Tag.CARPETS.getValues()) {
-            MATERIAL_FLAGS.put(carpet, 0);
-        }
-        for (Material sapling : Tag.SAPLINGS.getValues()) {
-            MATERIAL_FLAGS.put(sapling, 0);
-        }
-        for (Material log : Tag.LOGS.getValues()) {
-            MATERIAL_FLAGS.put(log, 0);
-        }
-        for (Material leaves : Tag.LEAVES.getValues()) {
-            MATERIAL_FLAGS.put(leaves, 0);
-        }
-        for (Material stair : Tag.STAIRS.getValues()) {
-            MATERIAL_FLAGS.put(stair, 0);
-        }
-        for (Material wool : Tag.WOOL.getValues()) {
-           MATERIAL_FLAGS.put(wool, 0);
-        }
-        for (Material plate : Tag.WOODEN_PRESSURE_PLATES.getValues()) {
-            MATERIAL_FLAGS.put(plate, 0);
-        }
-        for (Material button : Tag.BUTTONS.getValues()) {
-            MATERIAL_FLAGS.put(button, MODIFIED_ON_RIGHT);
-        }
-        for (Material pot : Tag.FLOWER_POTS.getValues()) {
-            MATERIAL_FLAGS.put(pot, MODIFIED_ON_RIGHT);
-        }
-        for (Material wall : Tag.WALLS.getValues()) {
-            MATERIAL_FLAGS.put(wall, 0);
-        }
-        for (Material sign : Tag.SIGNS.getValues()) {
-            MATERIAL_FLAGS.put(sign, 0);
-        }
-        for (Material flower : Tag.SMALL_FLOWERS.getValues()) {
-            MATERIAL_FLAGS.put(flower, 0);
-        }
-        for (Material bed : Tag.BEDS.getValues()) {
-            MATERIAL_FLAGS.put(bed, MODIFIED_ON_RIGHT);
-        }
-        for (Material musicDisc : Tag.ITEMS_MUSIC_DISCS.getValues()) {
-            MATERIAL_FLAGS.put(musicDisc, 0);
-        }
-        for (Material bannerPat : Tag.ITEMS_BANNERS.getValues()) {
-            MATERIAL_FLAGS.put(bannerPat, 0);
-        }
-        for (Material fenceGate : Tag.FENCE_GATES.getValues()) {
-            MATERIAL_FLAGS.put(fenceGate, MODIFIED_ON_RIGHT);
-        }
-        for (Material fence : Tag.FENCES.getValues()) {
-            MATERIAL_FLAGS.put(fence, 0);
-        }
+
         Stream.concat(Stream.concat(
                 Tag.CORAL_BLOCKS.getValues().stream(),
                 Tag.CORALS.getValues().stream()),
@@ -832,7 +903,6 @@ public final class Materials {
 
         // Check for missing items/blocks
         for (Material material : Material.values()) {
-            //noinspection deprecation
             if (material.isLegacy()) continue;
             // Add spawn eggs
             if (isSpawnEgg(material)) {
@@ -875,6 +945,7 @@ public final class Materials {
 //        DAMAGE_EFFECTS.add(PotionEffectType.DOLPHINS_GRACE);
         DAMAGE_EFFECTS.add(PotionEffectType.BAD_OMEN);
 //        DAMAGE_EFFECTS.add(PotionEffectType.HERO_OF_THE_VILLAGE);
+        DAMAGE_EFFECTS.add(PotionEffectType.DARKNESS);
     }
 
     private Materials() {
@@ -1035,6 +1106,16 @@ public final class Materials {
     }
 
     /**
+     * Test whether the given material is a Shulker Box.
+     *
+     * @param material the material
+     * @return true if a Shulker Box block
+     */
+    public static boolean isShulkerBox(Material material) {
+        return Tag.SHULKER_BOXES.isTagged(material);
+    }
+
+    /**
      * Test whether the given material is an inventory block.
      *
      * @param material the material
@@ -1052,211 +1133,96 @@ public final class Materials {
                 || material == Material.BARREL
                 || material == Material.BLAST_FURNACE
                 || material == Material.SMOKER
-                || shulkerBoxes.contains(material);
+                || material == Material.CHISELED_BOOKSHELF
+                || Tag.ITEMS_CHEST_BOATS.isTagged(material)
+                || Tag.SHULKER_BOXES.isTagged(material);
     }
 
     public static boolean isSpawnEgg(Material material) {
-        switch (material) {
-            case SPIDER_SPAWN_EGG:
-            case BAT_SPAWN_EGG:
-            case BEE_SPAWN_EGG:
-            case BLAZE_SPAWN_EGG:
-            case CAT_SPAWN_EGG:
-            case CAVE_SPIDER_SPAWN_EGG:
-            case CHICKEN_SPAWN_EGG:
-            case COD_SPAWN_EGG:
-            case COW_SPAWN_EGG:
-            case CREEPER_SPAWN_EGG:
-            case DOLPHIN_SPAWN_EGG:
-            case DONKEY_SPAWN_EGG:
-            case DROWNED_SPAWN_EGG:
-            case ELDER_GUARDIAN_SPAWN_EGG:
-            case ENDERMAN_SPAWN_EGG:
-            case ENDERMITE_SPAWN_EGG:
-            case EVOKER_SPAWN_EGG:
-            case FOX_SPAWN_EGG:
-            case GHAST_SPAWN_EGG:
-            case GUARDIAN_SPAWN_EGG:
-            case HOGLIN_SPAWN_EGG:
-            case HORSE_SPAWN_EGG:
-            case HUSK_SPAWN_EGG:
-            case LLAMA_SPAWN_EGG:
-            case MAGMA_CUBE_SPAWN_EGG:
-            case MOOSHROOM_SPAWN_EGG:
-            case MULE_SPAWN_EGG:
-            case OCELOT_SPAWN_EGG:
-            case PANDA_SPAWN_EGG:
-            case PARROT_SPAWN_EGG:
-            case PHANTOM_SPAWN_EGG:
-            case PIGLIN_BRUTE_SPAWN_EGG:
-            case PIGLIN_SPAWN_EGG:
-            case PIG_SPAWN_EGG:
-            case PILLAGER_SPAWN_EGG:
-            case POLAR_BEAR_SPAWN_EGG:
-            case PUFFERFISH_SPAWN_EGG:
-            case RABBIT_SPAWN_EGG:
-            case RAVAGER_SPAWN_EGG:
-            case SALMON_SPAWN_EGG:
-            case SHEEP_SPAWN_EGG:
-            case SHULKER_SPAWN_EGG:
-            case SILVERFISH_SPAWN_EGG:
-            case SKELETON_HORSE_SPAWN_EGG:
-            case SKELETON_SPAWN_EGG:
-            case SLIME_SPAWN_EGG:
-            case SQUID_SPAWN_EGG:
-            case STRAY_SPAWN_EGG:
-            case STRIDER_SPAWN_EGG:
-            case TRADER_LLAMA_SPAWN_EGG:
-            case TROPICAL_FISH_SPAWN_EGG:
-            case TURTLE_SPAWN_EGG:
-            case VEX_SPAWN_EGG:
-            case VILLAGER_SPAWN_EGG:
-            case VINDICATOR_SPAWN_EGG:
-            case WANDERING_TRADER_SPAWN_EGG:
-            case WITCH_SPAWN_EGG:
-            case WITHER_SKELETON_SPAWN_EGG:
-            case WOLF_SPAWN_EGG:
-            case ZOGLIN_SPAWN_EGG:
-            case ZOMBIE_HORSE_SPAWN_EGG:
-            case ZOMBIFIED_PIGLIN_SPAWN_EGG:
-            case ZOMBIE_SPAWN_EGG:
-            case ZOMBIE_VILLAGER_SPAWN_EGG:
-                return true;
-            default:
-                return false;
-        }
+        return getEntitySpawnEgg(material) != null;
     }
 
     public static EntityType getEntitySpawnEgg(Material material) {
-        switch (material) {
-            case SPIDER_SPAWN_EGG:
-                return EntityType.SPIDER;
-            case BAT_SPAWN_EGG:
-                return EntityType.BAT;
-            case BEE_SPAWN_EGG:
-                return EntityType.BEE;
-            case BLAZE_SPAWN_EGG:
-                return EntityType.BLAZE;
-            case CAT_SPAWN_EGG:
-                return EntityType.CAT;
-            case CAVE_SPIDER_SPAWN_EGG:
-                return EntityType.CAVE_SPIDER;
-            case CHICKEN_SPAWN_EGG:
-                return EntityType.CHICKEN;
-            case COD_SPAWN_EGG:
-                return EntityType.COD;
-            case COW_SPAWN_EGG:
-                return EntityType.COW;
-            case CREEPER_SPAWN_EGG:
-                return EntityType.CREEPER;
-            case DOLPHIN_SPAWN_EGG:
-                return EntityType.DOLPHIN;
-            case DONKEY_SPAWN_EGG:
-                return EntityType.DONKEY;
-            case DROWNED_SPAWN_EGG:
-                return EntityType.DROWNED;
-            case ELDER_GUARDIAN_SPAWN_EGG:
-                return EntityType.ELDER_GUARDIAN;
-            case ENDERMAN_SPAWN_EGG:
-                return EntityType.ENDERMAN;
-            case ENDERMITE_SPAWN_EGG:
-                return EntityType.ENDERMITE;
-            case EVOKER_SPAWN_EGG:
-                return EntityType.EVOKER;
-            case FOX_SPAWN_EGG:
-                return EntityType.FOX;
-            case GHAST_SPAWN_EGG:
-                return EntityType.GHAST;
-            case GUARDIAN_SPAWN_EGG:
-                return EntityType.GUARDIAN;
-            case HOGLIN_SPAWN_EGG:
-                return EntityType.HOGLIN;
-            case HORSE_SPAWN_EGG:
-                return EntityType.HORSE;
-            case HUSK_SPAWN_EGG:
-                return EntityType.HUSK;
-            case LLAMA_SPAWN_EGG:
-                return EntityType.LLAMA;
-            case MAGMA_CUBE_SPAWN_EGG:
-                return EntityType.MAGMA_CUBE;
-            case MOOSHROOM_SPAWN_EGG:
-                return EntityType.MUSHROOM_COW;
-            case MULE_SPAWN_EGG:
-                return EntityType.MULE;
-            case OCELOT_SPAWN_EGG:
-                return EntityType.OCELOT;
-            case PANDA_SPAWN_EGG:
-                return EntityType.PANDA;
-            case PARROT_SPAWN_EGG:
-                return EntityType.PARROT;
-            case PHANTOM_SPAWN_EGG:
-                return EntityType.PHANTOM;
-            case PIGLIN_BRUTE_SPAWN_EGG:
-                return EntityType.PIGLIN_BRUTE;
-            case PIGLIN_SPAWN_EGG:
-                return EntityType.PIGLIN;
-            case PILLAGER_SPAWN_EGG:
-                return EntityType.PILLAGER;
-            case POLAR_BEAR_SPAWN_EGG:
-                return EntityType.POLAR_BEAR;
-            case PUFFERFISH_SPAWN_EGG:
-                return EntityType.PUFFERFISH;
-            case RABBIT_SPAWN_EGG:
-                return EntityType.RABBIT;
-            case RAVAGER_SPAWN_EGG:
-                return EntityType.RAVAGER;
-            case SALMON_SPAWN_EGG:
-                return EntityType.SALMON;
-            case SHEEP_SPAWN_EGG:
-                return EntityType.SHEEP;
-            case SHULKER_SPAWN_EGG:
-                return EntityType.SHULKER;
-            case SILVERFISH_SPAWN_EGG:
-                return EntityType.SILVERFISH;
-            case SKELETON_HORSE_SPAWN_EGG:
-                return EntityType.SKELETON_HORSE;
-            case SKELETON_SPAWN_EGG:
-                return EntityType.SKELETON;
-            case SLIME_SPAWN_EGG:
-                return EntityType.SLIME;
-            case SQUID_SPAWN_EGG:
-                return EntityType.SQUID;
-            case STRAY_SPAWN_EGG:
-                return EntityType.STRAY;
-            case STRIDER_SPAWN_EGG:
-                return EntityType.STRIDER;
-            case TRADER_LLAMA_SPAWN_EGG:
-                return EntityType.TRADER_LLAMA;
-            case TROPICAL_FISH_SPAWN_EGG:
-                return EntityType.TROPICAL_FISH;
-            case TURTLE_SPAWN_EGG:
-                return EntityType.TURTLE;
-            case VEX_SPAWN_EGG:
-                return EntityType.VEX;
-            case VILLAGER_SPAWN_EGG:
-                return EntityType.VILLAGER;
-            case VINDICATOR_SPAWN_EGG:
-                return EntityType.VINDICATOR;
-            case WANDERING_TRADER_SPAWN_EGG:
-                return EntityType.WANDERING_TRADER;
-            case WITCH_SPAWN_EGG:
-                return EntityType.WITCH;
-            case WITHER_SKELETON_SPAWN_EGG:
-                return EntityType.WITHER_SKELETON;
-            case WOLF_SPAWN_EGG:
-                return EntityType.WOLF;
-            case ZOMBIE_HORSE_SPAWN_EGG:
-                return EntityType.ZOMBIE_HORSE;
-            case ZOMBIFIED_PIGLIN_SPAWN_EGG:
-                return EntityType.ZOMBIFIED_PIGLIN;
-            case ZOMBIE_SPAWN_EGG:
-                return EntityType.ZOMBIE;
-            case ZOMBIE_VILLAGER_SPAWN_EGG:
-                return EntityType.ZOMBIE_VILLAGER;
-            case PIG_SPAWN_EGG:
-            default: // Uhh
-                return EntityType.PIG;
-        }
+        return switch (material) {
+            case ALLAY_SPAWN_EGG -> EntityType.ALLAY;
+            case AXOLOTL_SPAWN_EGG -> EntityType.AXOLOTL;
+            case SPIDER_SPAWN_EGG -> EntityType.SPIDER;
+            case BAT_SPAWN_EGG -> EntityType.BAT;
+            case BEE_SPAWN_EGG -> EntityType.BEE;
+            case BLAZE_SPAWN_EGG -> EntityType.BLAZE;
+            case CAT_SPAWN_EGG -> EntityType.CAT;
+            case CAMEL_SPAWN_EGG -> EntityType.CAMEL;
+            case CAVE_SPIDER_SPAWN_EGG -> EntityType.CAVE_SPIDER;
+            case CHICKEN_SPAWN_EGG -> EntityType.CHICKEN;
+            case COD_SPAWN_EGG -> EntityType.COD;
+            case COW_SPAWN_EGG -> EntityType.COW;
+            case CREEPER_SPAWN_EGG -> EntityType.CREEPER;
+            case DOLPHIN_SPAWN_EGG -> EntityType.DOLPHIN;
+            case DONKEY_SPAWN_EGG -> EntityType.DONKEY;
+            case DROWNED_SPAWN_EGG -> EntityType.DROWNED;
+            case ELDER_GUARDIAN_SPAWN_EGG -> EntityType.ELDER_GUARDIAN;
+            case ENDER_DRAGON_SPAWN_EGG -> EntityType.ENDER_DRAGON;
+            case ENDERMAN_SPAWN_EGG -> EntityType.ENDERMAN;
+            case ENDERMITE_SPAWN_EGG -> EntityType.ENDERMITE;
+            case EVOKER_SPAWN_EGG -> EntityType.EVOKER;
+            case FOX_SPAWN_EGG -> EntityType.FOX;
+            case FROG_SPAWN_EGG -> EntityType.FROG;
+            case GHAST_SPAWN_EGG -> EntityType.GHAST;
+            case GLOW_SQUID_SPAWN_EGG -> EntityType.GLOW_SQUID;
+            case GOAT_SPAWN_EGG -> EntityType.GOAT;
+            case GUARDIAN_SPAWN_EGG -> EntityType.GUARDIAN;
+            case HOGLIN_SPAWN_EGG -> EntityType.HOGLIN;
+            case HORSE_SPAWN_EGG -> EntityType.HORSE;
+            case HUSK_SPAWN_EGG -> EntityType.HUSK;
+            case IRON_GOLEM_SPAWN_EGG -> EntityType.IRON_GOLEM;
+            case LLAMA_SPAWN_EGG -> EntityType.LLAMA;
+            case MAGMA_CUBE_SPAWN_EGG -> EntityType.MAGMA_CUBE;
+            case MOOSHROOM_SPAWN_EGG -> EntityType.MUSHROOM_COW;
+            case MULE_SPAWN_EGG -> EntityType.MULE;
+            case OCELOT_SPAWN_EGG -> EntityType.OCELOT;
+            case PANDA_SPAWN_EGG -> EntityType.PANDA;
+            case PARROT_SPAWN_EGG -> EntityType.PARROT;
+            case PHANTOM_SPAWN_EGG -> EntityType.PHANTOM;
+            case PIGLIN_BRUTE_SPAWN_EGG -> EntityType.PIGLIN_BRUTE;
+            case PIGLIN_SPAWN_EGG -> EntityType.PIGLIN;
+            case PILLAGER_SPAWN_EGG -> EntityType.PILLAGER;
+            case POLAR_BEAR_SPAWN_EGG -> EntityType.POLAR_BEAR;
+            case PUFFERFISH_SPAWN_EGG -> EntityType.PUFFERFISH;
+            case RABBIT_SPAWN_EGG -> EntityType.RABBIT;
+            case RAVAGER_SPAWN_EGG -> EntityType.RAVAGER;
+            case SALMON_SPAWN_EGG -> EntityType.SALMON;
+            case SHEEP_SPAWN_EGG -> EntityType.SHEEP;
+            case SHULKER_SPAWN_EGG -> EntityType.SHULKER;
+            case SILVERFISH_SPAWN_EGG -> EntityType.SILVERFISH;
+            case SKELETON_HORSE_SPAWN_EGG -> EntityType.SKELETON_HORSE;
+            case SKELETON_SPAWN_EGG -> EntityType.SKELETON;
+            case SLIME_SPAWN_EGG -> EntityType.SLIME;
+            case SNIFFER_SPAWN_EGG -> EntityType.SNIFFER;
+            case SNOW_GOLEM_SPAWN_EGG -> EntityType.SNOWMAN;
+            case SQUID_SPAWN_EGG -> EntityType.SQUID;
+            case STRAY_SPAWN_EGG -> EntityType.STRAY;
+            case STRIDER_SPAWN_EGG -> EntityType.STRIDER;
+            case TADPOLE_SPAWN_EGG -> EntityType.TADPOLE;
+            case TRADER_LLAMA_SPAWN_EGG -> EntityType.TRADER_LLAMA;
+            case TROPICAL_FISH_SPAWN_EGG -> EntityType.TROPICAL_FISH;
+            case TURTLE_SPAWN_EGG -> EntityType.TURTLE;
+            case VEX_SPAWN_EGG -> EntityType.VEX;
+            case VILLAGER_SPAWN_EGG -> EntityType.VILLAGER;
+            case VINDICATOR_SPAWN_EGG -> EntityType.VINDICATOR;
+            case WANDERING_TRADER_SPAWN_EGG -> EntityType.WANDERING_TRADER;
+            case WARDEN_SPAWN_EGG -> EntityType.WARDEN;
+            case WITCH_SPAWN_EGG -> EntityType.WITCH;
+            case WITHER_SPAWN_EGG -> EntityType.WITHER;
+            case WITHER_SKELETON_SPAWN_EGG -> EntityType.WITHER_SKELETON;
+            case WOLF_SPAWN_EGG -> EntityType.WOLF;
+            case ZOGLIN_SPAWN_EGG -> EntityType.ZOGLIN;
+            case ZOMBIE_HORSE_SPAWN_EGG -> EntityType.ZOMBIE_HORSE;
+            case ZOMBIFIED_PIGLIN_SPAWN_EGG -> EntityType.ZOMBIFIED_PIGLIN;
+            case ZOMBIE_SPAWN_EGG -> EntityType.ZOMBIE;
+            case ZOMBIE_VILLAGER_SPAWN_EGG -> EntityType.ZOMBIE_VILLAGER;
+            case PIG_SPAWN_EGG -> EntityType.PIG;
+            default -> null;
+        };
     }
 
     public static boolean isBed(Material material) {
@@ -1280,20 +1246,14 @@ public final class Materials {
      * @return true if the material is a crop
      */
     public static boolean isCrop(Material type) {
-        return type == Material.WHEAT
-                || type == Material.CARROTS
-                || type == Material.POTATOES
-                || type == Material.BEETROOTS
-                || type == Material.MELON_STEM
-                || type == Material.PUMPKIN_STEM
-                || type == Material.PUMPKIN
-                || type == Material.MELON
-                || type == Material.CACTUS
-                || type == Material.SUGAR_CANE
-                || type == Material.BAMBOO
-                || type == Material.BAMBOO_SAPLING
-                || type == Material.SWEET_BERRY_BUSH
-                || type == Material.NETHER_WART;
+        if (Tag.CROPS.isTagged(type)) return true;
+        // yea, that's not all, there are some more
+        return switch (type) {
+            case PUMPKIN, MELON, CACTUS, SUGAR_CANE, BAMBOO, BAMBOO_SAPLING,
+                    SWEET_BERRY_BUSH, NETHER_WART, CAVE_VINES, CAVE_VINES_PLANT ->
+                    true;
+            default -> false;
+        };
     }
 
     /**
@@ -1305,7 +1265,8 @@ public final class Materials {
         return newType == Material.VINE ||
                 newType == Material.KELP ||
                 newType == Material.TWISTING_VINES ||
-                newType == Material.WEEPING_VINES;
+                newType == Material.WEEPING_VINES ||
+                Tag.CAVE_VINES.isTagged(newType);
 
     }
 
@@ -1321,24 +1282,17 @@ public final class Materials {
      */
     public static boolean isUseFlagApplicable(Material material) {
         if (Tag.BUTTONS.isTagged(material)
-                || Tag.DOORS.isTagged(material)
+                || Tag.WOODEN_DOORS.isTagged(material)
                 || Tag.WOODEN_TRAPDOORS.isTagged(material)
                 || Tag.FENCE_GATES.isTagged(material)
                 || Tag.PRESSURE_PLATES.isTagged(material)) {
             return true;
         }
-        switch (material) {
-            case LEVER:
-            case LECTERN:
-            case ENCHANTING_TABLE:
-            case BELL:
-            case LOOM:
-            case CARTOGRAPHY_TABLE:
-            case STONECUTTER:
-            case GRINDSTONE:
-                return true;
-            default: return false;
-        }
+        return switch (material) {
+            case LEVER, LECTERN, ENCHANTING_TABLE, BELL, LOOM,
+                    CARTOGRAPHY_TABLE, STONECUTTER, GRINDSTONE -> true;
+            default -> false;
+        };
     }
 
     /**
@@ -1384,7 +1338,11 @@ public final class Materials {
     public static boolean isConsideredBuildingIfUsed(Material type) {
         return type == Material.REPEATER
             || type == Material.COMPARATOR
-            || Tag.FLOWER_POTS.isTagged(type);
+            || type == Material.CAKE
+            || type == Material.DRAGON_EGG
+            || Tag.FLOWER_POTS.isTagged(type)
+            || Tag.CANDLES.isTagged(type)
+            || Tag.CANDLE_CAKES.isTagged(type);
     }
 
     /**
@@ -1414,37 +1372,17 @@ public final class Materials {
      * @return true if equippable armor
      */
     public static boolean isArmor(Material type) {
-        switch (type) {
-            case LEATHER_HELMET:
-            case LEATHER_CHESTPLATE:
-            case LEATHER_LEGGINGS:
-            case LEATHER_BOOTS:
-            case CHAINMAIL_HELMET:
-            case CHAINMAIL_CHESTPLATE:
-            case CHAINMAIL_LEGGINGS:
-            case CHAINMAIL_BOOTS:
-            case IRON_HELMET:
-            case IRON_CHESTPLATE:
-            case IRON_LEGGINGS:
-            case IRON_BOOTS:
-            case DIAMOND_HELMET:
-            case DIAMOND_CHESTPLATE:
-            case DIAMOND_LEGGINGS:
-            case DIAMOND_BOOTS:
-            case GOLDEN_HELMET:
-            case GOLDEN_CHESTPLATE:
-            case GOLDEN_LEGGINGS:
-            case GOLDEN_BOOTS:
-            case NETHERITE_HELMET:
-            case NETHERITE_CHESTPLATE:
-            case NETHERITE_LEGGINGS:
-            case NETHERITE_BOOTS:
-            case TURTLE_HELMET:
-            case ELYTRA:
-                return true;
-            default:
-                return false;
-        }
+        return switch (type) {
+            case LEATHER_HELMET, LEATHER_CHESTPLATE, LEATHER_LEGGINGS, LEATHER_BOOTS,
+                    CHAINMAIL_HELMET, CHAINMAIL_CHESTPLATE, CHAINMAIL_LEGGINGS, CHAINMAIL_BOOTS,
+                    IRON_HELMET, IRON_CHESTPLATE, IRON_LEGGINGS, IRON_BOOTS,
+                    DIAMOND_HELMET, DIAMOND_CHESTPLATE, DIAMOND_LEGGINGS, DIAMOND_BOOTS,
+                    GOLDEN_HELMET, GOLDEN_CHESTPLATE, GOLDEN_LEGGINGS, GOLDEN_BOOTS,
+                    NETHERITE_HELMET, NETHERITE_CHESTPLATE, NETHERITE_LEGGINGS, NETHERITE_BOOTS,
+                    TURTLE_HELMET, ELYTRA ->
+                    true;
+            default -> false;
+        };
     }
 
     /**
@@ -1465,61 +1403,40 @@ public final class Materials {
             case GOLDEN_HOE:
             case DIAMOND_HOE:
             case NETHERITE_HOE:
-                switch (targetMaterial) {
-                    case GRASS_BLOCK:
-                    case DIRT:
-                    case GRASS_PATH:
-                    // case COARSE_DIRT: // already handled by the server...
-                        return true;
-                }
-                return false;
+                return switch (targetMaterial) {
+                    case GRASS_BLOCK, DIRT, DIRT_PATH, ROOTED_DIRT ->
+                            true;
+                    default -> false;
+                };
             case WOODEN_AXE:
             case STONE_AXE:
             case IRON_AXE:
             case GOLDEN_AXE:
             case DIAMOND_AXE:
             case NETHERITE_AXE:
-                switch (targetMaterial) {
-                    case OAK_LOG:
-                    case DARK_OAK_LOG:
-                    case ACACIA_LOG:
-                    case BIRCH_LOG:
-                    case SPRUCE_LOG:
-                    case JUNGLE_LOG:
-                    case OAK_WOOD:
-                    case DARK_OAK_WOOD:
-                    case ACACIA_WOOD:
-                    case BIRCH_WOOD:
-                    case SPRUCE_WOOD:
-                    case JUNGLE_WOOD:
-                    case CRIMSON_STEM:
-                    case WARPED_STEM:
-                    case CRIMSON_HYPHAE:
-                    case WARPED_HYPHAE:
-                        return true;
-                }
-                return false;
+                if (isWaxedCopper(targetMaterial)) return true;
+                if (Tag.LOGS.isTagged(targetMaterial)) return true;
+                return switch (targetMaterial) {
+                    case OAK_WOOD, DARK_OAK_WOOD, ACACIA_WOOD, BIRCH_WOOD, SPRUCE_WOOD, PUMPKIN, BAMBOO_BLOCK,
+                            JUNGLE_WOOD, CRIMSON_STEM, WARPED_STEM, CRIMSON_HYPHAE, WARPED_HYPHAE ->
+                            true;
+                    default -> false;
+                };
             case WOODEN_SHOVEL:
             case STONE_SHOVEL:
             case IRON_SHOVEL:
             case GOLDEN_SHOVEL:
             case DIAMOND_SHOVEL:
             case NETHERITE_SHOVEL:
-                switch (targetMaterial) {
-                    case GRASS_BLOCK:
-                    case CAMPFIRE:
-                    case SOUL_CAMPFIRE:
-                        return true;
-                }
-                return false;
+                return switch (targetMaterial) {
+                    case GRASS_BLOCK, CAMPFIRE, SOUL_CAMPFIRE -> true;
+                    default -> false;
+                };
             case SHEARS:
-                switch (targetMaterial) {
-                    case PUMPKIN:
-                    case BEE_NEST:
-                    case BEEHIVE:
-                        return true;
-                }
-                return false;
+                return switch (targetMaterial) {
+                    case PUMPKIN, BEE_NEST, BEEHIVE -> true;
+                    default -> false;
+                };
             case BLACK_DYE:
             case BLUE_DYE:
             case BROWN_DYE:
@@ -1536,7 +1453,16 @@ public final class Materials {
             case RED_DYE:
             case WHITE_DYE:
             case YELLOW_DYE:
-                return Tag.SIGNS.isTagged(targetMaterial);
+            case GLOW_INK_SAC:
+            case INK_SAC:
+                return SIGNS_TAG.isTagged(targetMaterial);
+            case HONEYCOMB:
+                return isUnwaxedCopper(targetMaterial) || SIGNS_TAG.isTagged(targetMaterial);
+            case BRUSH:
+                return switch (targetMaterial) {
+                    case SUSPICIOUS_GRAVEL, SUSPICIOUS_SAND -> true;
+                    default -> false;
+                };
             default:
                 return false;
         }
@@ -1544,5 +1470,40 @@ public final class Materials {
 
     public static boolean isFire(Material type) {
         return type == Material.FIRE || type == Material.SOUL_FIRE;
+    }
+    
+    public static boolean isWaxedCopper(Material type) {
+        return switch (type) {
+            case WAXED_COPPER_BLOCK, WAXED_EXPOSED_COPPER, WAXED_WEATHERED_COPPER, WAXED_OXIDIZED_COPPER,
+                    WAXED_CUT_COPPER, WAXED_EXPOSED_CUT_COPPER, WAXED_WEATHERED_CUT_COPPER,
+                    WAXED_OXIDIZED_CUT_COPPER, WAXED_CUT_COPPER_STAIRS, WAXED_EXPOSED_CUT_COPPER_STAIRS,
+                    WAXED_WEATHERED_CUT_COPPER_STAIRS, WAXED_OXIDIZED_CUT_COPPER_STAIRS, WAXED_CUT_COPPER_SLAB,
+                    WAXED_EXPOSED_CUT_COPPER_SLAB, WAXED_WEATHERED_CUT_COPPER_SLAB, WAXED_OXIDIZED_CUT_COPPER_SLAB ->
+                    true;
+            default -> false;
+        };
+    }
+    
+    public static boolean isUnwaxedCopper(Material type) {
+        return switch (type) {
+            case COPPER_BLOCK, EXPOSED_COPPER, WEATHERED_COPPER, OXIDIZED_COPPER, CUT_COPPER,
+                    EXPOSED_CUT_COPPER, WEATHERED_CUT_COPPER, OXIDIZED_CUT_COPPER, CUT_COPPER_STAIRS,
+                    EXPOSED_CUT_COPPER_STAIRS, WEATHERED_CUT_COPPER_STAIRS, OXIDIZED_CUT_COPPER_STAIRS,
+                    CUT_COPPER_SLAB, EXPOSED_CUT_COPPER_SLAB, WEATHERED_CUT_COPPER_SLAB, OXIDIZED_CUT_COPPER_SLAB ->
+                    true;
+            default -> false;
+        };
+    }
+
+    public static boolean isAmethystGrowth(Material mat) {
+        return mat == Material.BUDDING_AMETHYST
+                || mat == Material.AMETHYST_CLUSTER
+                || mat == Material.LARGE_AMETHYST_BUD
+                || mat == Material.MEDIUM_AMETHYST_BUD
+                || mat == Material.SMALL_AMETHYST_BUD;
+    }
+
+    public static boolean isSculkGrowth(Material mat) {
+        return mat == Material.SCULK || mat == Material.SCULK_VEIN;
     }
 }

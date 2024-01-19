@@ -1,5 +1,66 @@
 # Changelog
 
+## 7.0.8
+* Add support for MC 1.19
+* Add skulk-growth flag and config option
+* Add copper-fade flag
+* Add data packs to report output
+* Add protection for allay inventory slot
+* Categorize allay item pickups under item-pickup flag
+* Categorize dragon egg interaction (teleporting) as building
+* Ignore most NPC-based actions for Player events
+* Optimize handling of tamed animals where the owner was offline (Paper only)
+* Optimize additional InventoryHolder accesses (Paper only)
+* Fix an exception that occurred when plugins created portals with non-player entities
+* Fix possible error when using Paper's entity origin API
+* Update bstats and squirrelid libs
+
+## 7.0.7
+* Add rock-growth flag for budding amethyst and pointed dripstone.
+* Add /rg migrateheights command. See https://worldguard.enginehub.org/en/latest/regions/commands/#migrate-region-heights
+* Add regions.set-parent-on-claim config (set to a region id for /rg claim to automatically assign the parent region).
+* Add `-i search` and `-s` flags to /rg list, -c to /rg teleport.
+* Fix an error in blacklist logging caused by non-player actions (eg on-dispense)
+* Treat unknown causes as known if using paper-entity-origin config option.
+* Improve lightning strike handling from channeling tridents (PaperMC only).
+* Ignore an error caused by lingering player references of offline players.
+* Add red sand to no-physics-sand.
+* Fix potion splash events being cancelled if no entities were affected.
+
+## 7.0.6
+
+* Add support for 1.17 blocks/items, drop support for 1.16.
+* Add use-dripleaf flag for "toggling" big dripleaf blocks.
+* Fix support for fully negative-height regions.
+* Fix crop-growth config option.
+* Be more rigorous with protecting blocks against dispenser behaviors.
+* Fix handling of lingering splash potion effects.
+* Handle other-explosion flag consistently for block-like entities (armor frames etc.)
+* Allow inheriting values for all flags (previously wasn't used for things like teleport.)
+* Region commands that defaulted to the region the player was standing in no longer check parents.
+* Fix child regions being unlinked when redefining a parent region.
+
+## 7.0.5
+
+* Add a use-anvil flag and exclude it from the use flag (since they can break on use.)
+* Add nonplayer-protection-domains flag which allows merging region borders from the perspective of pistons, saplings, etc.
+* Expand crop-related options (crop-growth, etc) to sweet berry bushes, nether wart, and bamboo.
+* Add a config option (`mobs.block-vehicle-entry`) to prevent non-players from entering vehicles.
+* Add a UUID flag (for developers/API usage).
+* Add map query methods with fallback flag (for developers/API usage).
+* Add `on` and `off` optional arguments for `/rg toggle-bypass` command.
+* Add additional timings info for session handlers.
+* Fix sponge-simulation clearing NBT from blocks. Note that if you are using sponge simulation you should switch to something like CraftBook as the feature will be removed from WorldGuard in a future (major) version.
+* Fix the `/rg` command showing up as unknown client-side to players without bypass perms.
+* Fix error propagation from third-party flag loading causing WG to error.
+* Fix a (harmless) exception that occurred when swapping armor slots to the offhand slot.
+* Fix empty lines being sent on enderpearl/chorus-fruit teleport if the deny messages were empty.
+* Fix an issue with falling blocks when using max-priority-association.
+* Fix performance issues with third-party plugins querying protection for offline players.
+* Fix dispensing shulkers over region boundaries.
+* Fix iron door interaction being denied as if it were a regular door.
+* Fix being able to enter/exit regions with the flag denied by using entity mounting functions in other plugins.
+
 ## 7.0.4 (including beta1)
 
 * Add support for MC 1.16. Dropped support for previous versions.

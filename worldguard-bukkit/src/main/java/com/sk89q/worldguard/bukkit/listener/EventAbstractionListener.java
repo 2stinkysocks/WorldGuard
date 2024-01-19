@@ -21,9 +21,7 @@ package com.sk89q.worldguard.bukkit.listener;
 
 import static com.sk89q.worldguard.bukkit.cause.Cause.create;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.BukkitWorldConfiguration;
+import com.destroystokyo.paper.event.entity.EntityZapEvent;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.bukkit.cause.Cause;
 import com.sk89q.worldguard.bukkit.event.DelegateEvent;
@@ -48,11 +46,13 @@ import com.sk89q.worldguard.bukkit.util.Events;
 import com.sk89q.worldguard.bukkit.util.Materials;
 import com.sk89q.worldguard.config.WorldConfiguration;
 import com.sk89q.worldguard.protection.flags.Flags;
+import io.papermc.lib.PaperLib;
 import org.bukkit.Bukkit;
 import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -83,6 +83,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockBurnEvent;
@@ -112,6 +113,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
+import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.EntityTameEvent;
 import org.bukkit.event.entity.EntityUnleashEvent;
 import org.bukkit.event.entity.ExpBottleEvent;
@@ -139,9 +141,11 @@ import org.bukkit.event.vehicle.VehicleDamageEvent;
 import org.bukkit.event.vehicle.VehicleDestroyEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.util.Vector;
 
@@ -159,17 +163,6 @@ public class EventAbstractionListener extends AbstractListener {
     private final EventDebounce<BlockPistonRetractKey> pistonRetractDebounce = EventDebounce.create(5000);
     private final EventDebounce<BlockPistonExtendKey> pistonExtendDebounce = EventDebounce.create(5000);
 
-    private static final boolean HAS_SNAPSHOT_INVHOLDER;
-    static {
-        boolean temp;
-        try {
-            Inventory.class.getMethod("getHolder", boolean.class);
-            temp = true;
-        } catch (NoSuchMethodException e) {
-            temp = false;
-        }
-        HAS_SNAPSHOT_INVHOLDER = temp;
-    }
     /**
      * Construct the listener.
      *
@@ -178,6 +171,17 @@ public class EventAbstractionListener extends AbstractListener {
     public EventAbstractionListener(WorldGuardPlugin plugin) {
         super(plugin);
     }
+
+    @Override
+    public void registerEvents() {
+        super.registerEvents();
+
+        if (PaperLib.isPaper()) {
+            PluginManager pm = getPlugin().getServer().getPluginManager();
+            pm.registerEvents(new EventAbstractionListener.PaperListener(), getPlugin());
+        }
+    }
+
 
     //-------------------------------------------------------------------------
     // Block break / place
@@ -297,6 +301,18 @@ public class EventAbstractionListener extends AbstractListener {
         }
     }
 
+    private void setDelegateEventMaterialOptions(DelegateEvent event, Material fromType, Material toType) {
+        if (fromType == Material.FARMLAND && toType == Material.DIRT) {
+            event.setSilent(true);
+            event.getRelevantFlags().add(Flags.TRAMPLE_BLOCKS);
+        } else if (Tag.REDSTONE_ORES.isTagged(fromType)) {
+            event.setSilent(true);
+        } else if (fromType == Material.BIG_DRIPLEAF && toType == Material.BIG_DRIPLEAF) {
+            event.setSilent(true);
+            event.getRelevantFlags().add(Flags.USE_DRIPLEAF);
+        }
+    }
+
     @EventHandler(ignoreCancelled = true)
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
         Block block = event.getBlock();
@@ -307,23 +323,12 @@ public class EventAbstractionListener extends AbstractListener {
 
         // Fire two events: one as BREAK and one as PLACE
         if (toType != Material.AIR && fromType != Material.AIR) {
-            boolean trample = fromType == Material.FARMLAND && toType == Material.DIRT;
             BreakBlockEvent breakDelagate = new BreakBlockEvent(event, cause, block);
-            if (trample) {
-                breakDelagate.setSilent(true);
-                breakDelagate.getRelevantFlags().add(Flags.TRAMPLE_BLOCKS);
-            } else if (fromType == Material.REDSTONE_ORE) {
-                breakDelagate.setSilent(true);
-            }
+            setDelegateEventMaterialOptions(breakDelagate, fromType, toType);
             boolean denied;
             if (!(denied = Events.fireToCancel(event, breakDelagate))) {
                 PlaceBlockEvent placeDelegate = new PlaceBlockEvent(event, cause, block.getLocation(), toType);
-                if (trample) {
-                    placeDelegate.setSilent(true);
-                    placeDelegate.getRelevantFlags().add(Flags.TRAMPLE_BLOCKS);
-                } else if (fromType == Material.REDSTONE_ORE) {
-                    placeDelegate.setSilent(true);
-                }
+                setDelegateEventMaterialOptions(placeDelegate, fromType, toType);
                 denied = Events.fireToCancel(event, placeDelegate);
             }
             if (denied && entity instanceof Player) {
@@ -449,7 +454,9 @@ public class EventAbstractionListener extends AbstractListener {
         switch (event.getAction()) {
             case PHYSICAL:
                 if (event.useInteractedBlock() != Result.DENY) {
-                    if (clicked.getType() == Material.FARMLAND || clicked.getType() == Material.TURTLE_EGG) {
+                    if (clicked.getType() == Material.FARMLAND ||
+                            clicked.getType() == Material.TURTLE_EGG ||
+                            clicked.getType() == Material.SNIFFER_EGG) {
                         BreakBlockEvent breakDelagate = new BreakBlockEvent(event, cause, clicked);
                         breakDelagate.setSilent(true);
                         breakDelagate.getRelevantFlags().add(Flags.TRAMPLE_BLOCKS);
@@ -467,7 +474,11 @@ public class EventAbstractionListener extends AbstractListener {
                         return;
                     }
                     DelegateEvent firedEvent = new UseBlockEvent(event, cause, clicked).setAllowed(hasInteractBypass(clicked));
-                    if (clicked.getType() == Material.REDSTONE_ORE) {
+                    if (Tag.REDSTONE_ORES.isTagged(clicked.getType())) {
+                        firedEvent.setSilent(true);
+                    }
+                    if (clicked.getType() == Material.BIG_DRIPLEAF) {
+                        firedEvent.getRelevantFlags().add(Flags.USE_DRIPLEAF);
                         firedEvent.setSilent(true);
                     }
                     interactDebounce.debounce(clicked, event.getPlayer(), event, firedEvent);
@@ -539,7 +550,7 @@ public class EventAbstractionListener extends AbstractListener {
                 // emit a "use block here" event where the player is
                 // standing, which is a hack to protect items that don't
                 // throw events
-                if (item != null && ((BukkitWorldConfiguration) getWorldConfig(BukkitAdapter.adapt(player.getWorld()))).blockUseAtFeet.test(item)) {
+                if (item != null && getWorldConfig(player.getWorld()).blockUseAtFeet.test(item)) {
                     if (Events.fireAndTestCancel(new UseBlockEvent(event, cause, player.getLocation().getBlock()))) {
                         event.setUseInteractedBlock(Result.DENY);
                     }
@@ -591,9 +602,7 @@ public class EventAbstractionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onSignChange(SignChangeEvent event) {
-        Events.fireToCancel(event, new UseBlockEvent(event, create(event.getPlayer()), event.getBlock()));
-
-        if (event.isCancelled()) {
+        if (Events.fireToCancel(event, new PlaceBlockEvent(event, create(event.getPlayer()), event.getBlock()))) {
             playDenyEffect(event.getPlayer(), event.getBlock().getLocation().add(0.5, 0.5, 0.5));
         }
     }
@@ -660,7 +669,7 @@ public class EventAbstractionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onBlockFromTo(BlockFromToEvent event) {
-        WorldConfiguration config = getWorldConfig(BukkitAdapter.adapt(event.getBlock().getWorld()));
+        WorldConfiguration config = getWorldConfig(event.getBlock().getWorld());
 
         // This only applies to regions but nothing else cares about high
         // frequency events at the moment
@@ -706,7 +715,7 @@ public class EventAbstractionListener extends AbstractListener {
             case DISPENSE_EGG:
             case EGG:
             case SPAWNER_EGG:
-                if (getWorldConfig(BukkitAdapter.adapt(event.getEntity().getWorld())).strictEntitySpawn) {
+                if (getWorldConfig(event.getEntity().getWorld()).strictEntitySpawn) {
                     Events.fireToCancel(event, new SpawnEntityEvent(event, Cause.unknown(), event.getEntity()));
                 }
                 break;
@@ -912,6 +921,12 @@ public class EventAbstractionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
+    public void onEntityPickupItem(EntityPickupItemEvent event) {
+        Item item = event.getItem();
+        pickupDebounce.debounce(event.getEntity(), item, event, new DestroyEntityEvent(event, create(event.getEntity()), event.getItem()));
+    }
+
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerDropItem(PlayerDropItemEvent event) {
         Events.fireToCancel(event, new SpawnEntityEvent(event, create(event.getPlayer()), event.getItemDrop()));
     }
@@ -941,34 +956,22 @@ public class EventAbstractionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onInventoryMoveItem(InventoryMoveItemEvent event) {
-        InventoryHolder causeHolder;
-        if (HAS_SNAPSHOT_INVHOLDER) {
-            causeHolder = event.getInitiator().getHolder(false);
-        } else {
-            causeHolder = event.getInitiator().getHolder();
-        }
+        InventoryHolder causeHolder = PaperLib.getHolder(event.getInitiator(), false).getHolder();
 
         WorldConfiguration wcfg = null;
         if (causeHolder instanceof Hopper
-                && (wcfg = getWorldConfig(BukkitAdapter.adapt((((Hopper) causeHolder).getWorld())))).ignoreHopperMoveEvents) {
+                && (wcfg = getWorldConfig((((Hopper) causeHolder).getWorld()))).ignoreHopperMoveEvents) {
             return;
         } else if (causeHolder instanceof HopperMinecart
-                && (wcfg = getWorldConfig(BukkitAdapter.adapt((((HopperMinecart) causeHolder).getWorld())))).ignoreHopperMoveEvents) {
+                && (wcfg = getWorldConfig((((HopperMinecart) causeHolder).getWorld()))).ignoreHopperMoveEvents) {
             return;
         }
 
         Entry entry;
 
         if ((entry = moveItemDebounce.tryDebounce(event)) != null) {
-            InventoryHolder sourceHolder;
-            InventoryHolder targetHolder;
-            if (HAS_SNAPSHOT_INVHOLDER) {
-                sourceHolder = event.getSource().getHolder(false);
-                targetHolder = event.getDestination().getHolder(false);
-            } else {
-                sourceHolder = event.getSource().getHolder();
-                targetHolder = event.getDestination().getHolder();
-            }
+            InventoryHolder sourceHolder = PaperLib.getHolder(event.getSource(), false).getHolder();
+            InventoryHolder targetHolder = PaperLib.getHolder(event.getDestination(), false).getHolder();
 
             Cause cause;
 
@@ -1025,7 +1028,7 @@ public class EventAbstractionListener extends AbstractListener {
                 }
             }
 
-            if (blocked == affectedSize) { // server does weird things with this if the event is modified, so use cached number
+            if (affectedSize > 0 && blocked == affectedSize) { // server does weird things with this if the event is modified, so use cached number
                 event.setCancelled(true);
             }
         }
@@ -1048,6 +1051,17 @@ public class EventAbstractionListener extends AbstractListener {
             Block placed = dispenserBlock.getRelative(dispenser.getFacing());
             Block clicked = placed.getRelative(dispenser.getFacing());
             handleBlockRightClick(event, cause, item, clicked, placed);
+
+            // handle special dispenser behavior
+            if (Materials.isShulkerBox(item.getType())) {
+                if (Events.fireToCancel(event, new PlaceBlockEvent(event, cause, placed.getLocation(), item.getType()))) {
+                    playDenyEffect(placed.getLocation());
+                }
+            } else if (isItemAppliedToBlock(item, placed)) {
+                if (Events.fireToCancel(event, new PlaceBlockEvent(event, cause, placed.getLocation(), placed.getType()))) {
+                    playDenyEffect(placed.getLocation());
+                }
+            }
         }
     }
 
@@ -1070,7 +1084,16 @@ public class EventAbstractionListener extends AbstractListener {
 
     @EventHandler(ignoreCancelled = true)
     public void onLingeringApply(AreaEffectCloudApplyEvent event) {
-        if (!Materials.hasDamageEffect(event.getEntity().getCustomEffects())) {
+        AreaEffectCloud entity = event.getEntity();
+        List<PotionEffect> effects = new ArrayList<>();
+        PotionEffectType baseEffectType = entity.getBasePotionData().getType().getEffectType();
+        if (baseEffectType != null) {
+            effects.add(new PotionEffect(baseEffectType, 0, 0));
+        }
+        if (entity.hasCustomEffects()) {
+            effects.addAll(entity.getCustomEffects());
+        }
+        if (!Materials.hasDamageEffect(effects)) {
             return;
         }
         Cause cause = create(event.getEntity());
@@ -1155,9 +1178,12 @@ public class EventAbstractionListener extends AbstractListener {
         }
 
         // Handle created spawn eggs
-        if (item != null && Materials.isSpawnEgg(item.getType())) {
-            Events.fireToCancel(event, new SpawnEntityEvent(event, cause, placed.getLocation().add(0.5, 0, 0.5), Materials.getEntitySpawnEgg(item.getType())));
-            return;
+        if (item != null) {
+            EntityType possibleEntityType = Materials.getEntitySpawnEgg(item.getType());
+            if (possibleEntityType != null) {
+                Events.fireToCancel(event, new SpawnEntityEvent(event, cause, placed.getLocation().add(0.5, 0, 0.5), possibleEntityType));
+                return;
+            }
         }
 
         // handle water/lava placement
@@ -1173,8 +1199,7 @@ public class EventAbstractionListener extends AbstractListener {
             return;
         }
 
-        if (holder instanceof Entity) {
-            Entity entity = (Entity) holder;
+        if (holder instanceof Entity entity) {
             Material mat = Materials.getRelatedMaterial((entity).getType());
             UseEntityEvent useEntityEvent = new UseEntityEvent(originalEvent, cause, entity);
             if (mat != null && hasInteractBypass((entity).getWorld(), mat)) {
@@ -1182,8 +1207,7 @@ public class EventAbstractionListener extends AbstractListener {
             }
             Events.fireToCancel(originalEvent, useEntityEvent);
         } else {
-            if (holder instanceof BlockState) {
-                final BlockState block = (BlockState) holder;
+            if (holder instanceof BlockState block && block.isPlaced()) {
                 final UseBlockEvent useBlockEvent = new UseBlockEvent(originalEvent, cause, block.getBlock());
                 if (hasInteractBypass(block.getWorld(), block.getType())) {
                     useBlockEvent.setAllowed(true);
@@ -1203,15 +1227,15 @@ public class EventAbstractionListener extends AbstractListener {
     }
 
     private static boolean hasInteractBypass(Block block) {
-        return ((BukkitWorldConfiguration) getWorldConfig(BukkitAdapter.adapt(block.getWorld()))).allowAllInteract.test(block);
+        return getWorldConfig(block.getWorld()).allowAllInteract.test(block);
     }
 
     private static boolean hasInteractBypass(World world, Material material) {
-        return ((BukkitWorldConfiguration) getWorldConfig(BukkitAdapter.adapt(world))).allowAllInteract.test(material);
+        return getWorldConfig(world).allowAllInteract.test(material);
     }
 
     private static boolean hasInteractBypass(World world, ItemStack item) {
-        return ((BukkitWorldConfiguration) getWorldConfig(BukkitAdapter.adapt(world))).allowAllInteract.test(item);
+        return getWorldConfig(world).allowAllInteract.test(item);
     }
 
     private static boolean isBlockModifiedOnClick(Block block, boolean rightClick) {
@@ -1226,15 +1250,21 @@ public class EventAbstractionListener extends AbstractListener {
 
     private static void playDenyEffect(Player player, Location location) {
         //player.playSound(location, Sound.SUCCESSFUL_HIT, 0.2f, 0.4f);
-        if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().particleEffects) {
+        if (getConfig().particleEffects) {
             player.playEffect(location, Effect.SMOKE, BlockFace.UP);
         }
     }
 
     private static void playDenyEffect(Location location) {
-        if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().particleEffects) {
+        if (getConfig().particleEffects) {
             location.getWorld().playEffect(location, Effect.SMOKE, BlockFace.UP);
         }
     }
 
+    private class PaperListener implements Listener {
+        @EventHandler(ignoreCancelled = true)
+        public void onEntityTransform(EntityZapEvent event) {
+            Events.fireToCancel(event, new DamageEntityEvent(event, create(event.getBolt()), event.getEntity()));
+        }
+    }
 }

@@ -48,6 +48,7 @@ public final class Flags {
 
     // Overrides membership check
     public static final StateFlag PASSTHROUGH = register(new StateFlag("passthrough", false));
+    public static final SetFlag<String> NONPLAYER_PROTECTION_DOMAINS = register(new SetFlag<>("nonplayer-protection-domains", null, new StringFlag(null)));
 
     // This flag is unlike the others. It forces the checking of region membership
     public static final StateFlag BUILD = register(new BuildFlag("build", true));
@@ -76,6 +77,7 @@ public final class Flags {
     public static final StateFlag TRAMPLE_BLOCKS = register(new StateFlag("block-trampling", false));
     public static final StateFlag FIREWORK_DAMAGE = register(new StateFlag("firework-damage", false));
     public static final StateFlag USE_ANVIL = register(new StateFlag("use-anvil", false));
+    public static final StateFlag USE_DRIPLEAF = register(new StateFlag("use-dripleaf", false));
 
     // These flags are similar to the ones above (used in tandem with BUILD),
     // but their defaults are set to TRUE because it is more user friendly.
@@ -122,9 +124,12 @@ public final class Flags {
     public static final StateFlag GRASS_SPREAD = register(new StateFlag("grass-growth", true));
     public static final StateFlag MYCELIUM_SPREAD = register(new StateFlag("mycelium-spread", true));
     public static final StateFlag VINE_GROWTH = register(new StateFlag("vine-growth", true));
+    public static final StateFlag ROCK_GROWTH = register(new StateFlag("rock-growth", true));
+    public static final StateFlag SCULK_GROWTH = register (new StateFlag("sculk-growth", true));
     public static final StateFlag CROP_GROWTH = register(new StateFlag("crop-growth", true));
     public static final StateFlag SOIL_DRY = register(new StateFlag("soil-dry", true));
     public static final StateFlag CORAL_FADE = register(new StateFlag("coral-fade", true));
+    public static final StateFlag COPPER_FADE = register(new StateFlag("copper-fade", true));
     public static final StateFlag WATER_FLOW = register(new StateFlag("water-flow", true));
     public static final StateFlag LAVA_FLOW = register(new StateFlag("lava-flow", true));
 
